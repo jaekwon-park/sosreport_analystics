@@ -1,0 +1,488 @@
+<DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>sosreport analytics report tool for rockPLACE </title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="../sosreport/css/bootstrap.min.css" rel="stylesheet">
+<link href="../sosreport/css/bootstrap-responsive.min.css" rel="stylesheet">
+<link href="../sosreport/css/google-fonts.css" rel="stylesheet">
+<link href="../sosreport/css/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+<link href="../sosreport/css/style.css" rel="stylesheet">
+<link href="../sosreport/css/pages/dashboard.css" rel="stylesheet">
+<link href="../sosreport/css/odometer.css" rel="stylesheet">
+<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+<!--[if lt IE 9]>
+      <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+<body>
+
+<!-- Github Fork Image
+<a href="https://github.com/afaqurk/linux-dash"><img style="position: absolute; top: 0; right: 0; border: 0;z-index:99999999;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+-->
+  <div class="navbar-inner">
+    <div class="container"> 
+       락플레이스 <a class="brand" href="convert.pl">pdf 변환</a>
+    </div>
+  </div>
+
+
+
+<div class="main">
+  <div class="main-inner"> 
+    <div class="container">
+    
+        <div class="lead" style="text-align: center;">
+<!--
+            <div class="btn icon-refresh pop js-refresh-info" rel="popover"
+               data-content="Click here to refresh all widgets on the page"
+               data-original-title="Refresh All Widgets" id="refresh-all">
+           </div> -->
+           <div>
+		   <!--              sosreport 기반 시스템 분석 보고서 -->
+           </div>
+        </div>
+		
+     <div class="row">
+        
+        <div class="span6">
+         <div class="widget widget-table action-table">
+            <div class="widget-header"> <i class="icon-info-sign"></i>
+              <h3>General Info</h3>
+             <!-- 
+              <div id="refresh-os" class="btn icon-refresh js-refresh-info">
+              </div>
+                -->
+            </div>
+            <!-- /widget-header -->
+            <div class="widget-content">
+                <br>
+              <div style="text-align:left;">
+              <b>OS:</b> <span class="" id="os-info"></span><br>
+              <b>Uptime:</b> <span id="os-uptime"></span><br>
+              <b>Hostname:</b> <span class="" id="os-hostname"></span><br>
+              <b>kernel version:</b> <span class="" id="os-kernel"></span><br>
+              <b>Architecture:</b> <span class="" id="os-arch"></span><br>
+              <br><br>
+              </div>
+            </div>
+            <!-- /widget-content --> 
+          </div>
+          <!-- /widget -->
+        </div>
+
+        <div class="span6">
+         <div class="widget">
+            <div class="widget-header"> <i class="icon-laptop"></i>
+              <h3>Cpu information</h3>
+             <!-- 
+              <div id="refresh-cpu" class="btn icon-refresh js-refresh-info">
+              </div>
+                -->
+            </div>
+            <!-- /widget-header -->
+            <div class="widget-content">
+               <div style="text-align:left;">
+                  <b>Number of cores:</b> <span class="" id="core-number"></span><br>
+                  <b>core model:</b> <span class="" id="core-model"></span>
+                </div>
+                <div class="cf big_stats">
+                  <div class="stat"> 
+                      <i class="icon-#">1 min</i>
+                      <span class="value odometer" id="cpu-1min-per"></span> %<br/>
+                      <span class="value" id="cpu-1min"></span>
+                  </div>
+                  
+                  <div class="stat"> 
+                      <i class="icon-#">5 min</i>
+                      <span class="value odometer" id="cpu-5min-per"></span> %<br/>
+                      <span class="value" id="cpu-5min"></span>
+                  </div>
+                  
+                  <div class="stat"> 
+                      <i class="icon-#">15 min</i>
+                      <span class="value odometer" id="cpu-15min-per"></span> %<br/>
+                      <span class="value" id="cpu-15min"></span>
+                  </div>
+                </div>
+
+            </div>
+            <!-- /widget-content --> 
+          </div>
+          <!-- /widget -->
+        </div>
+        
+        <div class="span12">
+         <div class="widget widget-nopad">
+            <div class="widget-header"> 
+                <i class="icon-list-alt"></i>
+                <h3>RAM</h3>
+<!--
+                <div id="refresh-ram" class="btn icon-refresh js-refresh-info">
+                </div> -->
+            </div>
+            <!-- /widget-header -->
+            <div class="widget-content">
+              <div class="widget big-stats-container">
+                <div class="widget-content">
+                  
+                  <div class="cf big_stats">
+                    <div class="stat"> 
+                        <i class="icon-#">Total</i>
+                        <span class="value odometer" id="ram-total"></span> MB
+                    </div>
+                    <!-- .stat -->
+                    
+                    <div class="stat"> 
+                        <i class="icon-#">Used</i>
+                        <span class="value odometer" id="ram-used"></span> MB 
+                        <br><span class="value odometer" id="ram-used-per"></span> %
+                    </div>
+                    <!-- .stat --> 
+                    
+                    <div class="stat"> 
+                        <i class="icon-#">Free</i>
+                        <span class="value odometer" id="ram-free"></span> MB
+                        <br><span class="value odometer" id="ram-free-per"></span> %
+                        
+                    </div>
+                    <!-- .stat --> 
+		<div class="stat">
+                        <i class="icon-#">buffer</i>
+                        <span class="value odometer" id="ram-buffer"></span> MB
+                        <br><span class="value odometer" id="ram-buffer-per"></span> %
+
+                    </div>
+                    <!-- .stat -->
+		<div class="stat">
+                        <i class="icon-#">cached</i>
+                        <span class="value odometer" id="ram-cache"></span> MB
+                        <br><span class="value odometer" id="ram-cache-per"></span> %
+
+                    </div>
+                    <!-- .stat -->
+
+                  
+                      
+                  </div>
+                </div>
+                <!-- /widget-content --> 
+                
+              </div>
+            </div>
+          </div>
+        </div>
+        
+     </div>
+    
+       
+    
+    
+      <div class="row">
+         <div class="span6">
+           <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-list"></i>
+              <h3>Daemon list</h3>
+<!--
+              <div id="refresh-whereis" class="btn icon-refresh js-refresh-info">
+              </div> -->
+            </div>
+            <!-- /widget-header -->
+            <div class="widget-content">
+              <table id="Daemon_dashboard" class="table table-hover table-condensed table-bordered" >
+              </table>
+            </div>
+            <!-- /widget-content --> 
+          </div>
+          <!-- /widget -->
+         </div><!-- /span -->
+         
+
+          <div class="span6">
+            <div class="widget widget-table action-table">
+            <div class="widget-header"> <i class="icon-group"></i>
+              <h3>Boot option</h3>
+            </div> 
+            <div class="widget-content">
+                  <div class="cf big_stats">
+                    <div class="stat"> 
+                        <span class="" id="os-boot"></span>
+                    </div>
+	    	</div>
+            </div>
+	   </div>
+          <!-- /widget -->
+	</div>
+        <!-- /span6 --> 
+       
+         
+
+
+         <div class="span6">
+           <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-monitor"></i>
+              <h3>kernel Parameter</h3>
+<!--
+              <div id="refresh-ip" class="btn icon-refresh js-refresh-info">
+              </div> -->
+            </div>
+            <!-- /widget-header -->
+            <div class="widget-content">
+                <table id="sysctl_dashboard" class="table table-hover table-condensed table-bordered" >
+                </table>
+            </div>
+            <!-- /widget-content --> 
+          </div>
+          <!-- /widget -->
+         </div><!-- /span -->
+         
+         <div class="span6">
+           <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-monitor"></i>
+              <h3>bonding 구성 정보</h3>
+		<!--
+              <div id="refresh-ispeed" class="btn icon-refresh js-refresh-info">
+              </div> -->
+            </div>
+            <!-- /widget-header -->
+            <div class="widget-content">
+                <table id="bondS_dashboard" class="table table-hover table-condensed table-bordered" >
+                </table>
+            </div>
+            <!-- /widget-content --> 
+          </div>
+          <!-- /widget -->
+         </div><!-- /span -->
+
+         <div class="span6">
+           <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-monitor"></i>
+              <h3>bonding device 정보</h3>
+		<!--
+              <div id="refresh-ispeed" class="btn icon-refresh js-refresh-info">
+              </div> -->
+            </div>
+            <!-- /widget-header -->
+            <div class="widget-content">
+                <table id="bond_dashboard" class="table table-hover table-condensed table-bordered" >
+                </table>
+            </div>
+            <!-- /widget-content --> 
+          </div>
+          <!-- /widget -->
+         </div><!-- /span -->
+         
+         
+		 <!-- online users widget (breaks DOM pattern) -->
+		<div class="span6 pull-right">
+			 <div class="widget widget-table action-table">
+            <div class="widget-header"> <i class="icon-group"></i>
+              <h3>Routing table</h3>
+		<!--
+              <div id="refresh-online" class="btn icon-refresh js-refresh-info">
+              </div> -->
+            </div>
+            <!-- /widget-header -->
+            <div class="widget-content">
+                
+              <table id="route_dashboard" class="table table-hover table-bordered table-condensed" >
+              </table>
+              
+            </div>
+            <!-- /widget-content --> 
+          </div>
+          <!-- /widget -->
+	</div><!-- /span6 -->
+      <!-- /row -->
+
+         <div class="span12">
+           <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-list"></i>
+              <h3>Disk Usage</h3>
+<!--
+              <div id="refresh-df" class="btn icon-refresh js-refresh-info">
+              </div> -->
+            </div>
+            <!-- /widget-header -->
+            <div class="widget-content">
+              <table id="df_dashboard" class="table table-hover table-condensed table-bordered" >
+              </table>
+            </div>
+            <!-- /widget-content --> 
+          </div>
+          <!-- /widget -->
+         </div>
+ </div>
+      <!-- /row -->
+		
+      <div class="row">
+        <div class="span12">
+          <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-dashboard"></i>
+              <h3>NIC</h3>
+		<!--
+              <div id="refresh-ps" class="btn icon-refresh js-refresh-info">
+              </div> -->
+			  <div class="pull-right"><!--
+                <input type="text" id="filter-ps" class="widget-search" placeholder="search..." />-->
+              </div>
+            </div>
+            <!-- /widget-header -->
+            <div class="widget-content">
+                
+              <table id="nic_dashboard" class="table table-hover table-condensed table-bordered" >
+              </table>
+            </div>
+            <!-- /widget-content --> 
+          </div>
+          <!-- /widget --> 
+        </div>
+        <!-- /span -->
+          
+      </div>
+      <!-- /row -->
+	  
+      <div class="row">
+        <div class="span12">
+          <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-dashboard"></i>
+              <h3> Processes </h3>
+		<!--
+              <div id="refresh-ps" class="btn icon-refresh js-refresh-info">
+              </div> -->
+			  <div class="pull-right"><!--
+                <input type="text" id="filter-ps" class="widget-search" placeholder="search..." />-->
+              </div>
+            </div>
+            <!-- /widget-header -->
+            <div class="widget-content">
+                
+              <table id="ps_dashboard" class="table table-hover table-condensed table-bordered" >
+              </table>
+            </div>
+            <!-- /widget-content --> 
+          </div>
+          <!-- /widget --> 
+        </div>
+        <!-- /span -->
+          
+      </div>
+      <!-- /row -->
+      
+      <div class="row">
+        <div class="span12">
+          <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-dashboard"></i>
+              <h3> Netstat </h3>
+<!--
+              <div id="refresh-netstat" class="btn btn-mini icon-refresh js-refresh-info">
+            </div> -->
+          </div>
+          <div class="widget-content">
+            <table id="netstat_dashboard" class="table table-hover table-condensed table-bordered" >
+            </table>
+	    
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span12">
+          <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-list-alt"></i>
+              <h3>Log message - warning </h3>
+<!--
+              <div id="refresh-netstat" class="btn btn-mini icon-refresh js-refresh-info">
+            </div> -->
+          </div>
+          <div class="widget-content">
+            <table id="warn_dashboard" class="table table-hover table-condensed table-bordered" >
+            </table>
+          </div>
+          </div>
+        </div>
+      </div>
+
+<div class="row">
+        <div class="span12">
+          <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-list-alt"></i>
+              <h3>Log Message - fail</h3>
+<!--
+              <div id="refresh-netstat" class="btn btn-mini icon-refresh js-refresh-info">
+            </div> -->
+          </div>
+          <div class="widget-content">
+            <table id="fail_dashboard" class="table table-hover table-condensed table-bordered" >
+            </table>
+          </div>
+          </div>
+        </div>
+      </div>
+
+<div class="row">
+        <div class="span12">
+          <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-list-alt"></i>
+              <h3>Log Message - error</h3>
+<!--
+              <div id="refresh-netstat" class="btn btn-mini icon-refresh js-refresh-info">
+            </div> -->
+          </div>
+          <div class="widget-content">
+            <table id="error_dashboard" class="table table-hover table-condensed table-bordered" >
+            </table>
+          </div>
+          </div>
+        </div>
+      </div>
+
+
+<div class="row">
+<div class="span12">
+<div class="widget widget-table">
+<div class="widget-header"> <form  id=save action="save.pl" method="post"><i type="submit"  class="icon-list-alt"></i>
+<H3><a href="#" onclick=save.submit()> 엔지니어 의견</a></h3>
+</div>
+<textarea rows="20" name="comment" id="comment_dashboard" style="width:100%;height=1em; overflow:hidden"></textarea></form>
+</div>
+</div>
+</div>
+
+
+    </div>
+  </div>
+  <!-- /main-inner --> 
+</div>
+<!-- /main -->
+
+<div class="footer">
+  <div class="footer-inner">
+    <div class="container">
+      <div class="row">
+<!--        <div class="span12"> &copy; 2013 <a href="http://github.com/afaqurk">Afaq Tariq</a>. </div> -->
+        <!-- /span12 --> 
+      </div>
+      <!-- /row --> 
+    </div>
+    <!-- /container --> 
+  </div>
+  <!-- /footer-inner --> 
+</div>
+<!-- /footer --> 
+<!-- Le javascript
+================================================== --> 
+<!-- Placed at the end of the document so the pages load faster --> 
+<script src="js/jquery.js"></script> 
+<script src="js/jquery-ui.min.js"></script> 
+<script src="js/bootstrap.js"></script>
+<script src="js/jquery.dataTables.min.js"></script>
+<script src="js/odometer.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/base.js"></script>
+
+</body>
+</html>
