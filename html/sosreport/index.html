@@ -376,18 +376,54 @@
           <div class="widget widget-table">
             <div class="widget-header"> <i class="icon-dashboard"></i>
               <h3> Netstat </h3>
-<!--
-              <div id="refresh-netstat" class="btn btn-mini icon-refresh js-refresh-info">
-            </div> -->
           </div>
           <div class="widget-content">
             <table id="netstat_dashboard" class="table table-hover table-condensed table-bordered" >
             </table>
-	    
           </div>
           </div>
         </div>
       </div>
+
+      <div class="row">
+        <div class="span12">
+          <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-dashboard"></i>
+              <h3> cpu user chart</h3>
+          </div>
+           <div class="widget-content">
+		   <div id="chart_cpu_user" ></div>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span12">
+          <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-dashboard"></i>
+              <h3> cpu system chart</h3>
+          </div>
+           <div class="widget-content">
+		   <div id="chart_cpu_system"></div>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span12">
+          <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-dashboard"></i>
+              <h3> cpu iowait chart </h3>
+          </div>
+           <div class="widget-content">
+		   <div id="chart_cpu_iowait"></div>
+          </div>
+          </div>
+        </div>
+      </div>
+
 
       <div class="row">
         <div class="span12">
@@ -483,6 +519,10 @@
 <script src="js/odometer.js"></script>
 <script src="js/dashboard.js"></script>
 <script src="js/base.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script src="js/cpu_user.js"></script>
+<script src="js/cpu_iowait.js"></script>
+<script src="js/cpu_system.js"></script>
 
 </body>
 </html>
