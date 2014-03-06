@@ -47,7 +47,9 @@ my $warn_save="warn.txt";
 my $fail_save="fail.txt";
 my $load_average_save="load_average.txt";
 my $comment_save="comment.txt";
-my $sar_cpu_save="sar_cpu.txt";
+my $sar_cpu_user_save="sar_cpu_user.txt";
+my $sar_cpu_system_save="sar_cpu_system.txt";
+my $sar_cpu_iowait_save="sar_cpu_iowait.txt";
 my $sar_memory_save="sar_memory.txt";
 
 # 스크립에서 사용할 경로 변수 읽기
@@ -159,20 +161,56 @@ for (my $i=0; $i<=$#sosreport_file_list; $i++) {
 	# sar 정보 분석 sar 하나씩 분석해서 별도 파일로 정규화 시킴 
 	for ( my $i=0; $i<= $#sar_file_list; $i++) {
 		my @sar_data = read_line_file($sar_file_list[$i]);
-#		print $sar_data[0]."\n";
-#		print $sar_file_list[$i]."\n";
-		foreach(@sar_data) {
+		foreach(@sar_data){
 			s/\s+/,/g;
 		}
+		# cpu usage user
 		my @sar_cpu_data = grep /^\d+:\d+:\d+\,all,/ , @sar_data;
-#		my @sar_cpu_data = grep /,all,/, @sar_data;
-		foreach (@sar_cpu_data) {
-			s/$/\n/g;
-			s/^\d+:\d+:\d+,all,(\d?\.\d+,)\d?\.\d+,\d?\.\d+,\d?\.\d+,\d?\.\d+,\d?\.\d+/$1/g;
+		if ( !-e $sosreport_save_pwd.$sar_cpu_user_save) {
+			for ( my $i=0; $i<=$#sar_cpu_data; $i++) {
+				my $sar_time = (split ",", $sar_cpu_data[$i])[0];
+				my $cpu_usage = (split ",", $sar_cpu_data[$i])[2];
+				write_file($sosreport_save_pwd.$sar_cpu_user_save,"'".$sar_time."'".",".$cpu_usage."\n");
+			}
+		} else {
+			my @sar_save_data = read_line_file($sosreport_save_pwd.$sar_cpu_user_save);
+			unlink ($sosreport_save_pwd.$sar_cpu_user_save);
+			for ( my $i=0; $i<=$#sar_cpu_data; $i++) {
+				my $cpu_usage = (split ",", $sar_cpu_data[$i])[2];
+				write_file($sosreport_save_pwd.$sar_cpu_user_save, $sar_save_data[$i].",".$cpu_usage."\n");
+			}
 		}
-#		@sar_cpu_data =  (split ",", @sar_cpu_data)[2];
-#		push my @sar_cpu_regular = @sar_cpu_data;
-		array_write_file($sosreport_save_pwd.$sar_cpu_save, @sar_cpu_data);
+		# cpu usage system
+		my @sar_cpu_data = grep /^\d+:\d+:\d+\,all,/ , @sar_data;
+		if ( !-e $sosreport_save_pwd.$sar_cpu_system_save) {
+			for ( my $i=0; $i<=$#sar_cpu_data; $i++) {
+				my $sar_time = (split ",", $sar_cpu_data[$i])[0];
+				my $cpu_usage = (split ",", $sar_cpu_data[$i])[4];
+				write_file($sosreport_save_pwd.$sar_cpu_system_save,"'".$sar_time."'".",".$cpu_usage."\n");
+			}
+		} else {
+			my @sar_save_data = read_line_file($sosreport_save_pwd.$sar_cpu_system_save);
+			unlink ($sosreport_save_pwd.$sar_cpu_system_save);
+			for ( my $i=0; $i<=$#sar_cpu_data; $i++) {
+				my $cpu_usage = (split ",", $sar_cpu_data[$i])[4];
+				write_file($sosreport_save_pwd.$sar_cpu_system_save, $sar_save_data[$i].",".$cpu_usage."\n");
+			}
+		}
+		# cpu usage iowait
+		if ( !-e $sosreport_save_pwd.$sar_cpu_iowait_save) {
+			for ( my $i=0; $i<=$#sar_cpu_data; $i++) {
+				my $sar_time = (split ",", $sar_cpu_data[$i])[0];
+				my $cpu_usage = (split ",", $sar_cpu_data[$i])[5];
+				write_file($sosreport_save_pwd.$sar_cpu_iowait_save,"'".$sar_time."'".",".$cpu_usage."\n");
+			}
+		} else {
+			my @sar_save_data = read_line_file($sosreport_save_pwd.$sar_cpu_iowait_save);
+			unlink ($sosreport_save_pwd.$sar_cpu_iowait_save);
+			for ( my $i=0; $i<=$#sar_cpu_data; $i++) {
+				my $cpu_usage = (split ",", $sar_cpu_data[$i])[5];
+				write_file($sosreport_save_pwd.$sar_cpu_iowait_save, $sar_save_data[$i].",".$cpu_usage."\n");
+			}
+		}
 	}
 
 	# 아래쪽은 완성 됨 #########################
@@ -502,6 +540,15 @@ sub write_file {
 	close $out;
 	return;
 }
+
+sub write_new_file {
+	my ($filename, $content) = @_;
+	open my $out, '>:encoding(console_out)', $filename or die "Could not open '$filename' for writing $!\n";
+	print $out $content;
+	close $out;
+	return;
+}
+
 
 sub array_write_file {
 	my ($filename, @content) = @_;
