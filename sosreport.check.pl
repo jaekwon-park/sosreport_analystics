@@ -50,7 +50,12 @@ my $comment_save="comment.txt";
 my $sar_cpu_user_save="sar_cpu_user.txt";
 my $sar_cpu_system_save="sar_cpu_system.txt";
 my $sar_cpu_iowait_save="sar_cpu_iowait.txt";
-my $sar_memory_save="sar_memory.txt";
+my $sar_cswch_save="sar_cswsh.txt";
+my $sar_memfree_save="sar_memfree.txt";
+my $sar_memused_save="sar_memused.txt";
+my $sar_membuffer_save="sar_membuffer.txt";
+my $sar_memcache_save="sar_memcache.txt";
+my $sar_memswap_save="sar_memswap.txt";
 
 # 스크립에서 사용할 경로 변수 읽기
 my $cpu_info_file="/proc/cpuinfo";
@@ -211,17 +216,38 @@ for (my $i=0; $i<=$#sosreport_file_list; $i++) {
 				write_file($sosreport_save_pwd.$sar_cpu_iowait_save, $sar_save_data[$i].",".$cpu_usage."\n");
 			}
 		}
-	}
+		# cswsh/s 부분 별도의 파일로 저장
+		my $sar_data_string = join "#", @sar_data;
+		my ($sar_data_cswch) = $sar_data_string =~ m/cswch\/s#(.*?)Average/s;
+		save_sar_data($sar_data_cswch, $sosreport_save_pwd.$sar_cswch_save,1);
+		# memory 부분
+		my ($sar_data_memory) = $sar_data_string =~ m/kbswpcad#(.*?)Average/s;
+		save_sar_data($sar_data_memory,$sosreport_save_pwd.$sar_memfree_save,1);
+		save_sar_data($sar_data_memory,$sosreport_save_pwd.$sar_memused_save,3);
+		save_sar_data($sar_data_memory,$sosreport_save_pwd.$sar_membuffer_save,4);
+		save_sar_data($sar_data_memory,$sosreport_save_pwd.$sar_memcache_save,5);
+		save_sar_data($sar_data_memory,$sosreport_save_pwd.$sar_memswap_save,7);
+
+	}	
+
+
+
 	#chart header 에 쓰일 title
 	foreach(@sar_file_list) {
 		s/\/tmp\/sosreport\/$sosreport_name\/var\/log\/sa\/sar/'/g;
 	}
 	my $user_title = join "',",@sar_file_list;
 
-	#char 만들기 함수
-	make_chart_js("cpu_user",$sosreport_save_pwd.$sar_cpu_user_save,$user_title,$homepage_index.$sosreport_name);
-	make_chart_js("cpu_iowait",$sosreport_save_pwd.$sar_cpu_iowait_save,$user_title,$homepage_index.$sosreport_name);
-	make_chart_js("cpu_system",$sosreport_save_pwd.$sar_cpu_system_save,$user_title,$homepage_index.$sosreport_name);
+	#chart 만들기 함수
+	make_percent_chart_js("cpu_user",$sosreport_save_pwd.$sar_cpu_user_save,$user_title,$homepage_index.$sosreport_name);
+	make_percent_chart_js("cpu_iowait",$sosreport_save_pwd.$sar_cpu_iowait_save,$user_title,$homepage_index.$sosreport_name);
+	make_percent_chart_js("cpu_system",$sosreport_save_pwd.$sar_cpu_system_save,$user_title,$homepage_index.$sosreport_name);
+	make_chart_js("cswch",$sosreport_save_pwd.$sar_cswch_save,$user_title,$homepage_index.$sosreport_name);
+	make_chart_js("mem_free",$sosreport_save_pwd.$sar_memfree_save,$user_title,$homepage_index.$sosreport_name);
+	make_percent_chart_js("mem_used",$sosreport_save_pwd.$sar_memused_save,$user_title,$homepage_index.$sosreport_name);
+	make_chart_js("mem_buffer",$sosreport_save_pwd.$sar_membuffer_save,$user_title,$homepage_index.$sosreport_name);
+	make_chart_js("mem_cache",$sosreport_save_pwd.$sar_memcache_save,$user_title,$homepage_index.$sosreport_name);
+	make_chart_js("mem_swap",$sosreport_save_pwd.$sar_memswap_save,$user_title,$homepage_index.$sosreport_name);
 
 	# 아래쪽은 완성 됨 #########################
 	# bonding 정보 구하기
@@ -592,6 +618,34 @@ sub make_chart_js {
 			write_file($save_pwd."/js/".$save_file.".js", " ]);\n");
 			write_file($save_pwd."/js/".$save_file.".js", "var options = {  title: '".$save_file."'   };\n");
 			write_file($save_pwd."/js/".$save_file.".js", "var chart = new google.visualization.LineChart(document.getElementById('chart_".$save_file."'));\n");
+			write_file($save_pwd."/js/".$save_file.".js", "chart.draw(data, options);\n");
+			write_file($save_pwd."/js/".$save_file.".js", "}\n");
+		} elsif ($i==0) {
+			write_file($save_pwd."/js/".$save_file.".js", "google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n");
+			write_file($save_pwd."/js/".$save_file.".js", "google.setOnLoadCallback(drawChart);\n");
+			write_file($save_pwd."/js/".$save_file.".js", "function drawChart() {\n");
+			write_file($save_pwd."/js/".$save_file.".js", "var data = google.visualization.arrayToDataTable([\n");
+			write_file($save_pwd."/js/".$save_file.".js", "['time',".$user_title."'],\n");
+			write_file($save_pwd."/js/".$save_file.".js", "[".$sar_save_data[$i]."],\n");
+		} else {
+			write_file($save_pwd."/js/".$save_file.".js", "[".$sar_save_data[$i]."],\n");
+		}
+	}
+}
+
+sub make_percent_chart_js{ 
+	my @vars = @_;
+	my $save_file = $vars[0];
+	my $load_file = $vars[1];
+	my $user_title = $vars[2];
+	my $save_pwd = $vars[3];
+	my @sar_save_data = read_line_file($load_file);
+	for (my $i=0; $i<=$#sar_save_data; $i++) {
+		if ( $i==$#sar_save_data) {
+			write_file($save_pwd."/js/".$save_file.".js", "[".$sar_save_data[$i]."]\n");
+			write_file($save_pwd."/js/".$save_file.".js", " ]);\n");
+			write_file($save_pwd."/js/".$save_file.".js", "var options = {  title: '".$save_file."'   };\n");
+			write_file($save_pwd."/js/".$save_file.".js", "var chart = new google.visualization.LineChart(document.getElementById('chart_".$save_file."'));\n");
 			write_file($save_pwd."/js/".$save_file.".js", "chart.draw(data, {vAxis:{maxValue:100,minValue:0}});\n");
 			write_file($save_pwd."/js/".$save_file.".js", "}\n");
 		} elsif ($i==0) {
@@ -603,6 +657,28 @@ sub make_chart_js {
 			write_file($save_pwd."/js/".$save_file.".js", "[".$sar_save_data[$i]."],\n");
 		} else {
 			write_file($save_pwd."/js/".$save_file.".js", "[".$sar_save_data[$i]."],\n");
+		}
+	}
+}
+
+sub save_sar_data {
+	my @vars = @_;
+	my $array = $vars[0];
+	my $save_file = $vars[1];
+	my $position = $vars[2];
+	my @sar_data = ( split "#", $array);
+	if ( !-e $save_file) {
+		for (my $i=0; $i<=$#sar_data; $i++) {
+			my $time = (split ",", $sar_data[$i])[0];
+			my $data = (split ",", $sar_data[$i])[$position];
+			write_file($save_file,"'".$time."',".$data."\n");
+		}
+	} else {
+		my @sar_save_data = read_line_file($save_file);
+		unlink ($save_file);
+		for (my $i=0; $i<=$#sar_data; $i++) {
+			my $data = (split ",", $sar_data[$i])[$position];
+			write_file($save_file,$sar_save_data[$i].",".$data."\n");
 		}
 	}
 }
