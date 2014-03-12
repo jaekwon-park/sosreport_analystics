@@ -13,7 +13,9 @@ my $filename = ( split "/", $full_path)[4];
 
 my $q = CGI->new;
 $q->charset('utf-8');
-my $comment =decode("utf-8",$q-> param('comment'));
+my $comment = decode("utf-8",$q-> param('comment'));
+#$comment =~ s/\r\n/<br>/g;
+#$comment = "<pre>".$comment."</pre>";
 
 #print "Content-type: text/html\n\n";
 #print $full_path."\n";
@@ -24,4 +26,4 @@ print $out $comment;
 close $out;
 
 
-print $q->redirect("http://192.168.100.183/".$filename);
+#print $q->redirect("http://192.168.100.183/".$filename."/comment.html");

@@ -56,6 +56,9 @@ my $sar_memused_save="sar_memused.txt";
 my $sar_membuffer_save="sar_membuffer.txt";
 my $sar_memcache_save="sar_memcache.txt";
 my $sar_memswap_save="sar_memswap.txt";
+my $sar_load15_save="sar_load15.txt";
+my $sar_load5_save="sar_load5.txt";
+my $sar_load1_save="sar_load1.txt";
 
 # 스크립에서 사용할 경로 변수 읽기
 my $cpu_info_file="/proc/cpuinfo";
@@ -114,6 +117,7 @@ for (my $i=0; $i<=$#sosreport_file_list; $i++) {
 	mkdir $homepage_index.$sosreport_name."/sh/data" or die "mkdir faild $homepage_index$sosreport_name"."/sh/data";
 	# sh, js 파일들만 복사 css파일들은 index.html 에서 참조하여 복사하지 않음 
 	copy $homepage_index."sosreport/index.html", $homepage_index.$sosreport_name."/index.html" or die "copy failed";
+	copy $homepage_index."sosreport/comment.html", $homepage_index.$sosreport_name."/comment.html" or die "copy failed";
 	copy $homepage_index."sosreport/convert.pl", $homepage_index.$sosreport_name."/convert.pl" or die "copy failed";
 	copy $homepage_index."sosreport/save.pl", $homepage_index.$sosreport_name."/save.pl" or die "copy failed";
 	for (my $i=0; $i<=$#homepage_js_file_list; $i++) {
@@ -216,8 +220,9 @@ for (my $i=0; $i<=$#sosreport_file_list; $i++) {
 				write_file($sosreport_save_pwd.$sar_cpu_iowait_save, $sar_save_data[$i].",".$cpu_usage."\n");
 			}
 		}
-		# cswsh/s 부분 별도의 파일로 저장
+		# 배열에 라인 구분자 # 붙여서 스트링으로 변환
 		my $sar_data_string = join "#", @sar_data;
+		# context switch 부분
 		my ($sar_data_cswch) = $sar_data_string =~ m/cswch\/s#(.*?)Average/s;
 		save_sar_data($sar_data_cswch, $sosreport_save_pwd.$sar_cswch_save,1);
 		# memory 부분
@@ -226,8 +231,11 @@ for (my $i=0; $i<=$#sosreport_file_list; $i++) {
 		save_sar_data($sar_data_memory,$sosreport_save_pwd.$sar_memused_save,3);
 		save_sar_data($sar_data_memory,$sosreport_save_pwd.$sar_membuffer_save,4);
 		save_sar_data($sar_data_memory,$sosreport_save_pwd.$sar_memcache_save,5);
-		save_sar_data($sar_data_memory,$sosreport_save_pwd.$sar_memswap_save,7);
-
+		save_sar_data($sar_data_memory,$sosreport_save_pwd.$sar_memswap_save,8);
+		my ($sar_data_loadavg) = $sar_data_string =~ m/ldavg-15#(.*?)Average/s;
+		save_sar_data($sar_data_loadavg,$sosreport_save_pwd.$sar_load15_save,5);
+		save_sar_data($sar_data_loadavg,$sosreport_save_pwd.$sar_load5_save,4);
+		save_sar_data($sar_data_loadavg,$sosreport_save_pwd.$sar_load1_save,3);
 	}	
 
 
@@ -247,7 +255,10 @@ for (my $i=0; $i<=$#sosreport_file_list; $i++) {
 	make_percent_chart_js("mem_used",$sosreport_save_pwd.$sar_memused_save,$user_title,$homepage_index.$sosreport_name);
 	make_chart_js("mem_buffer",$sosreport_save_pwd.$sar_membuffer_save,$user_title,$homepage_index.$sosreport_name);
 	make_chart_js("mem_cache",$sosreport_save_pwd.$sar_memcache_save,$user_title,$homepage_index.$sosreport_name);
-	make_chart_js("mem_swap",$sosreport_save_pwd.$sar_memswap_save,$user_title,$homepage_index.$sosreport_name);
+	make_percent_chart_js("mem_swap",$sosreport_save_pwd.$sar_memswap_save,$user_title,$homepage_index.$sosreport_name);
+	make_chart_js("ldavg_15",$sosreport_save_pwd.$sar_load15_save,$user_title,$homepage_index.$sosreport_name);
+	make_chart_js("ldavg_5",$sosreport_save_pwd.$sar_load5_save,$user_title,$homepage_index.$sosreport_name);
+	make_chart_js("ldavg_1",$sosreport_save_pwd.$sar_load1_save,$user_title,$homepage_index.$sosreport_name);
 
 	# 아래쪽은 완성 됨 #########################
 	# bonding 정보 구하기
@@ -389,39 +400,12 @@ for (my $i=0; $i<=$#sosreport_file_list; $i++) {
 	my @warn_messages_uniq = uniq(@warn_messages);	
 	for ( my $i=0; $i<=$#warn_messages_uniq;$i++) {
 		write_file($sosreport_save_pwd.$warn_save, $warn_messages_uniq[$i]."\n");
-		#if ( grep {/pci_mmcfg_init marking 256MB space uncacheable/} $warn_messages_uniq[$i]) {
-		#	write_file($sosreport_save_pwd.$comment_save,$warn_messages_uniq[$i]."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"메시지 내용"."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"시스템의 성능에 문제가 생길수 있음"."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"해결방법"."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"acpi_mcfg_max_pci_bus_num = on /etc/grub.conf의 부팅커널의 kernel 파라미터에 추가"."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"참고"."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"https://access.redhat.com/site/solutions/45820 (rhn-id 필요)"."\n");
-		#}
-		#if ( grep {/security_ops_task_setrlimit/} $warn_messages_uniq[$i]) {
-		#	write_file($sosreport_save_pwd.$comment_save,$warn_messages_uniq[$i]."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"메시지 내용"."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"단순 참고 메시지"."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"해결방법"."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"없음. 단순 참고 메시지"."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"참고"."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"https://access.redhat.com/site/solutions/290593 (rhn-id 필요)"."\n");
-		#}
 	}
 
 	my @fail_messages = grep {/fail/i} @messages_data;
 	my @fail_messages_uniq = uniq(@fail_messages);	
 	for ( my $i=0; $i<=$#fail_messages_uniq;$i++) {
 		write_file($sosreport_save_pwd.$fail_save, $fail_messages_uniq[$i]."\n");
-		#	if ( grep { /JBD: barrier-based sync failed on dm/} $fail_messages_uniq[$i]) {
-		#	write_file($sosreport_save_pwd.$comment_save,$fail_messages_uniq[$i]."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"메시지 내용"."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"filesystem의 barrier 기능이 꺼짐"."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"해결방법"."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"없음. 단순 참고 메시지"."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"참고"."\n");
-		#	write_file($sosreport_save_pwd.$comment_save,"https://access.redhat.com/site/solutions/25951 (rhn-id 필요)"."\n");
-		#}
 	}
 	if ( !-e $sosreport_save_pwd.$comment_save) {
 		write_file($sosreport_save_pwd.$comment_save,"특이사항이 없습니다."."\n");

@@ -389,7 +389,7 @@
         <div class="span12">
           <div class="widget widget-table">
             <div class="widget-header"> <i class="icon-dashboard"></i>
-              <h3> cpu user chart</h3>
+              <h3> cpu 사용률 - user </h3>
           </div>
            <div class="widget-content">
 		   <div id="chart_cpu_user" ></div>
@@ -402,7 +402,7 @@
         <div class="span12">
           <div class="widget widget-table">
             <div class="widget-header"> <i class="icon-dashboard"></i>
-              <h3> cpu system chart</h3>
+              <h3> cpu 사용률 - system</h3>
           </div>
            <div class="widget-content">
 		   <div id="chart_cpu_system"></div>
@@ -415,7 +415,7 @@
         <div class="span12">
           <div class="widget widget-table">
             <div class="widget-header"> <i class="icon-dashboard"></i>
-              <h3> cpu iowait chart </h3>
+              <h3> cpu 사용률 - iowait</h3>
           </div>
            <div class="widget-content">
 		   <div id="chart_cpu_iowait"></div>
@@ -428,7 +428,7 @@
         <div class="span12">
           <div class="widget widget-table">
             <div class="widget-header"> <i class="icon-dashboard"></i>
-              <h3> context switches chart </h3>
+              <h3> context switches </h3>
           </div>
            <div class="widget-content">
 		   <div id="chart_cswch"></div>
@@ -441,7 +441,7 @@
         <div class="span12">
           <div class="widget widget-table">
             <div class="widget-header"> <i class="icon-dashboard"></i>
-              <h3> memory free chart </h3>
+              <h3> memory free </h3>
           </div>
            <div class="widget-content">
 		   <div id="chart_mem_free"></div>
@@ -493,10 +493,49 @@
         <div class="span12">
           <div class="widget widget-table">
             <div class="widget-header"> <i class="icon-dashboard"></i>
-              <h3> memory swap used</h3>
+              <h3> memory swap percent </h3>
           </div>
            <div class="widget-content">
 		   <div id="chart_mem_swap"></div>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span12">
+          <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-dashboard"></i>
+              <h3> load average 1분</h3>
+          </div>
+           <div class="widget-content">
+		   <div id="chart_ldavg_1"></div>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span12">
+          <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-dashboard"></i>
+              <h3> load average 5분</h3>
+          </div>
+           <div class="widget-content">
+		   <div id="chart_ldavg_5"></div>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span12">
+          <div class="widget widget-table">
+            <div class="widget-header"> <i class="icon-dashboard"></i>
+              <h3> load average 15분 </h3>
+          </div>
+           <div class="widget-content">
+		   <div id="chart_ldavg_15"></div>
           </div>
           </div>
         </div>
@@ -558,10 +597,14 @@
 <div class="row">
 <div class="span12">
 <div class="widget widget-table">
-<div class="widget-header"> <form  id=save action="save.pl" method="post"><i type="submit"  class="icon-list-alt"></i>
-<H3><a href="#" onclick=save.submit()> 엔지니어 의견</a></h3>
+<div class="widget-header"><i class="icon-list-alt"></i> 
+<H3><a href="javascript:popupOpen();">엔지니어 의견</a></h3></div>
+            <div class="widget-content">
+                  <div class="cf big_stats">
+                    <div class="stat" > 
+			    <table id="comment_dashboard" class="clearfix"></table></div>
 </div>
-<textarea rows="20" name="comment" id="comment_dashboard" style="width:100%;height=1em; overflow:hidden"></textarea></form>
+</div>
 </div>
 </div>
 </div>
@@ -606,7 +649,17 @@
 <script src="js/mem_buffer.js"></script>
 <script src="js/mem_cache.js"></script>
 <script src="js/mem_swap.js"></script>
+<script src="js/ldavg_15.js"></script>
+<script src="js/ldavg_5.js"></script>
+<script src="js/ldavg_1.js"></script>
 <script src="js/cswch.js"></script>
+<script type="text/javascript">
+function popupOpen(){
+	var popUrl = "comment.html";	//팝업창에 출력될 페이지 URL
+	var popOption = "width=370, height=360, resizable=yes, scrollbars=yes, status=no;";    //팝업창 옵션(optoin)
+	window.open(popUrl,"",popOption);
+}
+</script>
 
 </body>
 </html>
