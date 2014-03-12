@@ -488,7 +488,7 @@ for (my $i; $i <=$#host_name_index; $i++) {
 		$kdump[0] = "off";
 	} else {
 		$kdump[0] = (split "," , $kdump[0])[5];
-	}
+	}	
 	my $daemon_count = read_line_file($host_name_index[$i]."/sh/data/daemon_list.txt");
 	my $error_count;
 	if ( -e $host_name_index[$i]."/sh/data/error.txt") {
@@ -528,21 +528,31 @@ sub regular_bond {
 }
 
 sub read_line_file {
+	my @all;
 	my ($filename) = @_;
 	#open my $in , '<:encoding(console_in)', $filename or die "could not open '$filename' for reading $!";
+	if ( -e $filename ) {
 	open my $in , '<:encoding(console_in)', $filename or  print "could not open '$filename' for reading $!\n";
-	chomp (my @all = grep /\S/, readline($in));
+	chomp ( @all = grep /\S/, readline($in));
 	close $in;
+	} else {
+		@all = "";
+	}	
 	return @all;
 }
 
 sub read_file{
+	my $all;
 	my ($filename) = @_;
 	#open my $in , '<:encoding(console_in)', $filename or die "could not open '$filename' for reading $!";
+	if ( -e $filename ) {
 	open my $in , '<:encoding(console_in)', $filename or print "could not open '$filename' for reading $!\n";
 	local $/ = undef;
-	my $all = <$in>;;
+	$all = <$in>;;
 	close $in;
+	} else {
+		$all = "";
+	}	
 	return $all;
 }
 
