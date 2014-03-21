@@ -454,7 +454,7 @@ dashboard.getSysctl = function() {
     }, "json");
 }
 
-dashboard.getWhereIs = function() {
+dashboard.getWhereis= function() {
     $.get("sh/where.php", function(data) {
         var table = $("#whereis_dashboard");
         var ex = document.getElementById("whereis_dashboard");
@@ -478,6 +478,29 @@ dashboard.getWhereIs = function() {
     }, "json");
 }
 
+dashboard.getComment = function() {
+    $.get("sh/comment.php", function(data) {
+        var table = $("#comment_dashboard");
+        var ex = document.getElementById("comment_dashboard");
+        if ($.fn.DataTable.fnIsDataTable(ex)) {
+            table.hide().dataTable().fnClearTable();
+            table.dataTable().fnDestroy();
+        }
+
+        table.dataTable({
+            aaData: data,
+            aoColumns: [
+                { sTitle: "" }
+            ],
+            bPaginate: false,
+            bFilter: false,
+            bAutoWidth: false,
+            bInfo: false,
+            bSort: false
+        }).fadeIn();
+    }, "json");
+}
+
 dashboard.getOs = function() {
     generate_os_data("sh/issue.php", "#os-info");
     generate_os_data("sh/hostname.php", "#os-hostname");
@@ -487,7 +510,6 @@ dashboard.getOs = function() {
     generate_os_data("sh/corename.php", "#core-model");
     generate_os_data("sh/grub.php", "#os-boot");
     generate_os_data("sh/arch.php", "#os-arch");
-    generate_os_data("sh/comment.php", "#comment_dashboard");
 }
 
 dashboard.getIp = function() {
@@ -574,6 +596,7 @@ dashboard.fnMap = {
     error: dashboard.getError,
     warn: dashboard.getWarn,
     fail: dashboard.getFail,
+    comment: dashboard.getComment,
     kdump: dashboard.getKdump,
     index: dashboard.getIndex,
     netstat: dashboard.getNetstat
