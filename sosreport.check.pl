@@ -136,9 +136,11 @@ for (my $i=0; $i<=$#sosreport_file_list; $i++) {
 	}
 	if ( !-e $extract_dir.$lsb_release_file) {
 		my $today = strftime "%m %d %H:%M:%S",localtime;
+		mkdir $extract_dir."/sos_commands/lsbrelease/";
 		write_file($extract_dir.$lsb_release_file,"Description:	lsb_release file does't exist");			
 	}
 	if ( !-e $extract_dir.$kdump_file) {
+		mkdir $extract_dir."/etc";
 		write_file($extract_dir.$kdump_file,"kdump.conf file does't exist");			
 	}
 
@@ -167,59 +169,19 @@ for (my $i=0; $i<=$#sosreport_file_list; $i++) {
 	my @ps_data = read_line_file($extract_dir.$ps_file);
 	my @sar_file_list = glob ($extract_dir.$sar_dir_file."sar*");
 
+
 	# sar 정보 분석 sar 하나씩 분석해서 별도 파일로 정규화 시킴 
 	for ( my $i=0; $i<= $#sar_file_list; $i++) {
 		my @sar_data = read_line_file($sar_file_list[$i]);
-		foreach(@sar_data){
+		foreach(@sar_data){		# sar파일을 읽어온 배열 @sar_data에 공백을 comma로 바꿈
 			s/\s+/,/g;
 		}
 		# cpu usage user
-		my @sar_cpu_data = grep /^\d+:\d+:\d+\,all,/ , @sar_data;
-		if ( !-e $sosreport_save_pwd.$sar_cpu_user_save) {
-			for ( my $i=0; $i<=$#sar_cpu_data; $i++) {
-				my $sar_time = (split ",", $sar_cpu_data[$i])[0];
-				my $cpu_usage = (split ",", $sar_cpu_data[$i])[2];
-				write_file($sosreport_save_pwd.$sar_cpu_user_save,"'".$sar_time."'".",".$cpu_usage."\n");
-			}
-		} else {
-			my @sar_save_data = read_line_file($sosreport_save_pwd.$sar_cpu_user_save);
-			unlink ($sosreport_save_pwd.$sar_cpu_user_save);
-			for ( my $i=0; $i<=$#sar_cpu_data; $i++) {
-				my $cpu_usage = (split ",", $sar_cpu_data[$i])[2];
-				write_file($sosreport_save_pwd.$sar_cpu_user_save, $sar_save_data[$i].",".$cpu_usage."\n");
-			}
-		}
-		# cpu usage system
-		my @sar_cpu_data = grep /^\d+:\d+:\d+\,all,/ , @sar_data;
-		if ( !-e $sosreport_save_pwd.$sar_cpu_system_save) {
-			for ( my $i=0; $i<=$#sar_cpu_data; $i++) {
-				my $sar_time = (split ",", $sar_cpu_data[$i])[0];
-				my $cpu_usage = (split ",", $sar_cpu_data[$i])[4];
-				write_file($sosreport_save_pwd.$sar_cpu_system_save,"'".$sar_time."'".",".$cpu_usage."\n");
-			}
-		} else {
-			my @sar_save_data = read_line_file($sosreport_save_pwd.$sar_cpu_system_save);
-			unlink ($sosreport_save_pwd.$sar_cpu_system_save);
-			for ( my $i=0; $i<=$#sar_cpu_data; $i++) {
-				my $cpu_usage = (split ",", $sar_cpu_data[$i])[4];
-				write_file($sosreport_save_pwd.$sar_cpu_system_save, $sar_save_data[$i].",".$cpu_usage."\n");
-			}
-		}
-		# cpu usage iowait
-		if ( !-e $sosreport_save_pwd.$sar_cpu_iowait_save) {
-			for ( my $i=0; $i<=$#sar_cpu_data; $i++) {
-				my $sar_time = (split ",", $sar_cpu_data[$i])[0];
-				my $cpu_usage = (split ",", $sar_cpu_data[$i])[5];
-				write_file($sosreport_save_pwd.$sar_cpu_iowait_save,"'".$sar_time."'".",".$cpu_usage."\n");
-			}
-		} else {
-			my @sar_save_data = read_line_file($sosreport_save_pwd.$sar_cpu_iowait_save);
-			unlink ($sosreport_save_pwd.$sar_cpu_iowait_save);
-			for ( my $i=0; $i<=$#sar_cpu_data; $i++) {
-				my $cpu_usage = (split ",", $sar_cpu_data[$i])[5];
-				write_file($sosreport_save_pwd.$sar_cpu_iowait_save, $sar_save_data[$i].",".$cpu_usage."\n");
-			}
-		}
+		my @sar_cpu_data = grep /^\d+:\d+:\d+\,all,/ , @sar_data; # @sar_data에서 cpu 사용률 부분만 따로 @sar_cpu_data로 저장
+		my ($sar_cpu_string) = join "#", @sar_cpu_data;
+		save_sar_data($sar_cpu_string,$sosreport_save_pwd.$sar_cpu_user_save,2);
+		save_sar_data($sar_cpu_string,$sosreport_save_pwd.$sar_cpu_system_save,4);
+		save_sar_data($sar_cpu_string,$sosreport_save_pwd.$sar_cpu_iowait_save,5);
 		# 배열에 라인 구분자 # 붙여서 스트링으로 변환
 		my $sar_data_string = join "#", @sar_data;
 		# context switch 부분
@@ -661,18 +623,55 @@ sub save_sar_data {
 	my $save_file = $vars[1];
 	my $position = $vars[2];
 	my @sar_data = ( split "#", $array);
+	my %sar_time = create_time_table();
+
 	if ( !-e $save_file) {
 		for (my $i=0; $i<=$#sar_data; $i++) {
 			my $time = (split ",", $sar_data[$i])[0];
-			my $data = (split ",", $sar_data[$i])[$position];
-			write_file($save_file,"'".$time."',".$data."\n");
+			my $minute = (split ":", $time)[1];
+			my $hour = (split ":", $time)[0];
+			my $timestamp = join ( ":", $hour, $minute);
+			$sar_time{$timestamp}  = (split ",", $sar_data[$i])[$position];
+		#	my $data = (split ",", $sar_data[$i])[$position];
+			#write_file($save_file,"'".$time."',".$data."\n");
+		}
+		foreach my $key (sort keys %sar_time) {
+			write_file($save_file,"'".$key."',".$sar_time{$key}."\n");
 		}
 	} else {
 		my @sar_save_data = read_line_file($save_file);
 		unlink ($save_file);
 		for (my $i=0; $i<=$#sar_data; $i++) {
-			my $data = (split ",", $sar_data[$i])[$position];
-			write_file($save_file,$sar_save_data[$i].",".$data."\n");
+			my $time = (split ",", $sar_data[$i])[0];
+			my $minute = (split ":", $time)[1];
+			my $hour = (split ":", $time)[0];
+			my $timestamp = join ( ":", $hour, $minute);
+			$sar_time{$timestamp}  = (split ",", $sar_data[$i])[$position];
+			#my $data = (split ",", $sar_data[$i])[$position];
+			#write_file($save_file,$sar_save_data[$i].",".$data."\n");
+	#		write_file($save_file,$sar_save_data[$i].",".$sar_time{$timestamp}."\n");
+		}
+		
+		for (my $i=0; $i<=$#sar_save_data; $i++) {
+			my $time = (split ",", $sar_save_data[$i])[0];
+			$time =~ s/'//g;
+			my $minute = (split ":", $time)[1];
+			my $hour = (split ":", $time)[0];
+			my $timestamp = join ( ":", $hour, $minute);
+			write_file($save_file,$sar_save_data[$i].",".$sar_time{$timestamp}."\n");
 		}
 	}
+}
+
+sub create_time_table {
+	my %time;
+	for (my $i=0; $i <= 1430 ; $i = $i + 10) {
+       		my $m = $i % 60;
+	        my $h = int($i / 60);
+        	$time{join(':', (map { length($_) == 1 ? '0'.$_ : $_ } $h, $m))} = 0;
+	}	
+#	foreach my $key (sort keys %time) {
+#       	say "$key => $time{$key}";
+#	}
+	return %time;
 }
