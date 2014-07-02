@@ -443,8 +443,20 @@ for (my $i; $i <=$#host_name_index; $i++) {
 	my $kernel = read_file($host_name_index[$i]."/sh/data/uname.txt");
 	my $arch = read_file($host_name_index[$i]."/sh/data/arch.txt");
 	my $cpu_count = read_file($host_name_index[$i]."/sh/data/cpu_count.txt");
-	my $memory = (split ",", (read_file($host_name_index[$i]."/sh/data/mem.txt")))[1];
-	my $memory_used = (split ",", (read_file($host_name_index[$i]."/sh/data/mem.txt")))[4];
+	my $memory;
+	if ( -e $host_name_index[$i]."/sh/data/mem.txt") {
+	 	$memory = (split ",", (read_file($host_name_index[$i]."/sh/data/mem.txt")))[1];
+	}
+	else {
+	       	$memory= 1;
+	}
+	my $memory_used;
+	if ( -e $host_name_index[$i]."/sh/data/mem.txt") {
+	 	$memory_used = (split ",", (read_file($host_name_index[$i]."/sh/data/mem.txt")))[4];
+	}
+	else {
+	       	$memory_used= 1;
+	}
 	my $uptime = read_file($host_name_index[$i]."/sh/data/uptime.txt");
 	$uptime =~ s/:/분 /;
 	my @daemon_list =  read_line_file($host_name_index[$i]."/sh/data/daemon_list.txt");
@@ -476,7 +488,6 @@ for (my $i; $i <=$#host_name_index; $i++) {
 	else {
 	       	$fail_count = 0;
 	}
-
 	write_file($homepage_index."/sh/data/index.txt", join (":","<a href=./".(split "/", $host_name_index[$i])[4].">".$host_name."</a>","RHEL ".$os_ver,$kernel,$arch,$cpu_count,format_bytes($memory*1024*1024,precision=>0),format_bytes($memory_used*1024*1024,precision=>0),format_number($memory_used/$memory*100,2),$uptime, $kdump[0], $daemon_count, $warn_count, $fail_count ,$error_count."\n"));
 	}
 }
