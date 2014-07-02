@@ -435,6 +435,9 @@ unlink ($homepage_index."/sh/data/index.txt");
 
 my @host_name_index = glob ($homepage_index."*-*");
 for (my $i; $i <=$#host_name_index; $i++) {
+        if ( time() - (stat($host_name_index[$i]))->ctime > 604800) {
+                rmtree $host_name_index[$i]; 
+        } else {
 	my $host_name= read_file($host_name_index[$i]."/sh/data/hostname.txt");
 	my $os_ver = (split " ", (read_file($host_name_index[$i]."/sh/data/lsb_release.txt")))[6];
 	my $kernel = read_file($host_name_index[$i]."/sh/data/uname.txt");
@@ -475,7 +478,7 @@ for (my $i; $i <=$#host_name_index; $i++) {
 	}
 
 	write_file($homepage_index."/sh/data/index.txt", join (":","<a href=./".(split "/", $host_name_index[$i])[4].">".$host_name."</a>","RHEL ".$os_ver,$kernel,$arch,$cpu_count,format_bytes($memory*1024*1024,precision=>0),format_bytes($memory_used*1024*1024,precision=>0),format_number($memory_used/$memory*100,2),$uptime, $kdump[0], $daemon_count, $warn_count, $fail_count ,$error_count."\n"));
-
+	}
 }
 
 	
