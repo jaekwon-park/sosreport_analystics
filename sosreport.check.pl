@@ -96,19 +96,26 @@ rmtree $sosreport_extract_dir."*";
 
 # 배열로 읽어들인 sosreport 들의 압축을 해제함 
 for (my $i=0; $i<=$#sosreport_file_list; $i++) {
-
+	my $now = strftime "%H:%M:%S",localtime;
+	print $now." ".$sosreport_file_list[$i]." starting extract! \n";
 	my $sosreport = Archive::Extract -> new(archive => $sosreport_file_list[$i]); # 압축해제를 위한 압축파일 인식 
 	my $extract_ok = $sosreport -> extract ( to => $sosreport_extract_dir ) or die $sosreport -> error; # 압축파일 해제
 	my $extract_dir = $sosreport-> extract_path; 						# sosreport 압축 해제한 디렉토리명을 구함
+#	print  $sosreport_mv_job_done_dir.(split "/", $sosreport_file_list[$i])[3]."\n";
+	if ( -e $sosreport_mv_job_done_dir.(split "/", $sosreport_file_list[$i])[3] ) {
+		my $now = strftime "%H:%M:%S",localtime;
+		unlink $sosreport_mv_job_done_dir.(split "/", $sosreport_file_list[$i])[3] or die "remove sosreport fail ".$sosreport_mv_job_done_dir.(split "/", $sosreport_file_list[$i])[3]." from done folder $!";
+		print $now." ".(split "/", $sosreport_file_list[$i])[3]." delete from done folder \n";
+	}
 	move($sosreport_file_list[$i], $sosreport_mv_job_done_dir) or die "Move failed $!"; 	# 압축 해제한 sosreport 를 이동함
-	my $now = strftime "%H:%M:%S",localtime;
+	$now = strftime "%H:%M:%S",localtime;
 	print $now." ".$sosreport_file_list[$i]." extract done\n";
 	
 	my $sosreport_name = (split "/" ,$extract_dir)[3]; 					# sosreport의 이름을 변수로 받아옴 
 	my $sosreport_save_pwd=$homepage_index.$sosreport_name."/sh/data/"; # sosreport 분석 결과를 저장할 디렉토리 
 	# 예전에 남아있던 폴더를 확인해서 있으면 삭제함 
 	if ( -e $homepage_index.$sosreport_name ) {
-		rmtree $homepage_index.$sosreport_name or die "remove dir fail $homepage_index.$sosreport_name";
+		rmtree $homepage_index.$sosreport_name or die "remove dir fail $homepage_index.$sosreport_name $!";
 	}	
 	# sosreport 웹페이지 만들기에 필요한 디렉토리 및 파일 복사 
 	mkdir $homepage_index.$sosreport_name or die "mkdir faild $homepage_index$sosreport_name";
