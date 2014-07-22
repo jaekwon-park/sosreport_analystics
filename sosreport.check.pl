@@ -10,11 +10,13 @@ use File::Path;  		# 디렉토리 통째 삭제를 위한 모듈
 use File::stat;  		# 디렉토리 통째 삭제를 위한 모듈 
 use Encode;	 		# 한글 변환을 위한 모듈 
 use Encode::Locale;		# 한글 변환을 위한 모듈 
+use Encode::Guess qw/euc-kr utf8/;
 use utf8; 			# 한글 변환을 위한 모듈 
 use Time::Local; 		# 현재 시간을 구하기 위한 모듈 
 use POSIX;			# df 정보 foramtting을 위한 모듈 
 use Number::Format qw(:subs); 	# df 정보 formatting 을 위한 모듈 
-use Thread;
+#use Thread;
+
 
 # 스크립에서 사용할 경로 변수들 지정 
 my $sosreport_dir="/storage/sosreport"; 			# sosreport 를 읽어들일 경로
@@ -515,9 +517,9 @@ sub read_line_file {
 	my ($filename) = @_;
 	#open my $in , '<:encoding(console_in)', $filename or die "could not open '$filename' for reading $!";
 	if ( -e $filename ) {
-	open my $in , '<:encoding(console_in)', $filename or  print "could not open '$filename' for reading $!\n";
-	chomp ( @all = grep /\S/, readline($in));
-	close $in;
+		open my $in , '<:encoding(guess)', $filename or  print "could not open '$filename' for reading $!\n";
+		chomp ( @all = grep /\S/, readline($in));
+		close $in;
 	} else {
 		@all = "";
 	}	
