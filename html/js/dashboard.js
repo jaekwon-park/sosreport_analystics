@@ -78,7 +78,7 @@ dashboard.getPs = function() {
                 { sTitle: "TIME" },
                 { sTitle: "COMMAND" }
             ],
-            bPaginate: true,
+            bPaginate: false,
             sPaginationType: "full_numbers",
             bFilter: true,
             aaSorting: [[4, "desc"]],
