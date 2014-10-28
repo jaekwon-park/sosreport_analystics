@@ -98,19 +98,19 @@ rmtree $sosreport_extract_dir."*";
 
 # 배열로 읽어들인 sosreport 들의 압축을 해제함 
 for (my $i=0; $i<=$#sosreport_file_list; $i++) {
-	my $now = strftime "%H:%M:%S",localtime;
+	my $now = strftime "%F %H:%M:%S",localtime;
 	print $now." ".$sosreport_file_list[$i]." starting extract! \n";
 	my $sosreport = Archive::Extract -> new(archive => $sosreport_file_list[$i]); # 압축해제를 위한 압축파일 인식 
 	my $extract_ok = $sosreport -> extract ( to => $sosreport_extract_dir ) or die $sosreport -> error; # 압축파일 해제
 	my $extract_dir = $sosreport-> extract_path; 						# sosreport 압축 해제한 디렉토리명을 구함
 #	print  $sosreport_mv_job_done_dir.(split "/", $sosreport_file_list[$i])[3]."\n";
 	if ( -e $sosreport_mv_job_done_dir.(split "/", $sosreport_file_list[$i])[3] ) {
-		my $now = strftime "%H:%M:%S",localtime;
+		my $now = strftime "%F %H:%M:%S",localtime;
 		unlink $sosreport_mv_job_done_dir.(split "/", $sosreport_file_list[$i])[3] or die "remove sosreport fail ".$sosreport_mv_job_done_dir.(split "/", $sosreport_file_list[$i])[3]." from done folder $!";
 		print $now." ".(split "/", $sosreport_file_list[$i])[3]." delete from done folder \n";
 	}
 	move($sosreport_file_list[$i], $sosreport_mv_job_done_dir) or die "Move failed $!"; 	# 압축 해제한 sosreport 를 이동함
-	$now = strftime "%H:%M:%S",localtime;
+	$now = strftime "%F %H:%M:%S",localtime;
 	print $now." ".$sosreport_file_list[$i]." extract done\n";
 	
 	my $sosreport_name = (split "/" ,$extract_dir)[3]; 					# sosreport의 이름을 변수로 받아옴 
@@ -433,7 +433,7 @@ for (my $i=0; $i<=$#sosreport_file_list; $i++) {
 	
 	chmod 0777, $homepage_index.$sosreport_name."/sh/data/comment.txt" or die "chmod faild $homepage_index.$sosreport_name"."/sh/data/comment.txt";
 #	my $tid = Thread->self->tid;
-	my $now = strftime "%H:%M:%S",localtime;
+	my $now = strftime "%F %H:%M:%S",localtime;
 	print $now." ".$sosreport_name." Analystic done\n";
 
 }
@@ -445,59 +445,60 @@ unlink ($homepage_index."/sh/data/index.txt");
 my @host_name_index = glob ($homepage_index."*-*");
 for (my $i; $i <=$#host_name_index; $i++) {
         if ( time() - (stat($host_name_index[$i]))->ctime > 604800) {
+		my $now = strftime "%F %H:%M:%S",localtime;
+		print $now." ".$host_name_index[$i]." is old folder. Deleted\n";
                 rmtree $host_name_index[$i]; 
-        } else {
-	my $host_name= read_file($host_name_index[$i]."/sh/data/hostname.txt");
-	my $os_ver = (split " ", (read_file($host_name_index[$i]."/sh/data/lsb_release.txt")))[6];
-	my $kernel = read_file($host_name_index[$i]."/sh/data/uname.txt");
-	my $arch = read_file($host_name_index[$i]."/sh/data/arch.txt");
-	my $cpu_count = read_file($host_name_index[$i]."/sh/data/cpu_count.txt");
-	my $memory;
-	if ( -e $host_name_index[$i]."/sh/data/mem.txt") {
-	 	$memory = (split ",", (read_file($host_name_index[$i]."/sh/data/mem.txt")))[1];
-	}
-	else {
-	       	$memory= 1;
-	}
-	my $memory_used;
-	if ( -e $host_name_index[$i]."/sh/data/mem.txt") {
-	 	$memory_used = (split ",", (read_file($host_name_index[$i]."/sh/data/mem.txt")))[4];
-	}
-	else {
-	       	$memory_used= 1;
-	}
-	my $uptime = read_file($host_name_index[$i]."/sh/data/uptime.txt");
-	$uptime =~ s/:/분 /;
-	my @daemon_list =  read_line_file($host_name_index[$i]."/sh/data/daemon_list.txt");
-	my @kdump = grep {/kdump/} @daemon_list;
-	if ( !grep {/kdump/} @daemon_list) {
-		$kdump[0] = "off";
+        } elsif ( read_file($host_name_index[$i]."/sh/data/hostname.txt" )  eq  "" ) {
+		my $now = strftime "%F %H:%M:%S",localtime;
+		print $now." ".$host_name_index[$i]." host name value is empty. Deleted\n";
+              	rmtree $host_name_index[$i]; 
 	} else {
-		$kdump[0] = (split "," , $kdump[0])[5];
-	}	
-	my $daemon_count = read_line_file($host_name_index[$i]."/sh/data/daemon_list.txt");
-	my $error_count;
-	if ( -e $host_name_index[$i]."/sh/data/error.txt") {
-		$error_count = read_line_file($host_name_index[$i]."/sh/data/error.txt");
-	}
-	else {
-	       	$error_count = 0;
-	}
-	my $warn_count;
-	if ( -e $host_name_index[$i]."/sh/data/warn.txt") {
-		$warn_count = read_line_file($host_name_index[$i]."/sh/data/warn.txt");
-	}
-	else {
-	       	$warn_count = 0;
-	}
-	my $fail_count;
-	if ( -e $host_name_index[$i]."/sh/data/fail.txt") {
-		$fail_count = read_line_file($host_name_index[$i]."/sh/data/fail.txt");
-	}
-	else {
-	       	$fail_count = 0;
-	}
-	write_file($homepage_index."/sh/data/index.txt", join (":","<a href=./".(split "/", $host_name_index[$i])[4].">".$host_name."</a>","RHEL ".$os_ver,$kernel,$arch,$cpu_count,format_bytes($memory*1024*1024,precision=>0),format_bytes($memory_used*1024*1024,precision=>0),format_number($memory_used/$memory*100,2),$uptime, $kdump[0], $daemon_count, $warn_count, $fail_count ,$error_count."\n"));
+		my $host_name= read_file($host_name_index[$i]."/sh/data/hostname.txt");
+		my $os_ver = (split " ", (read_file($host_name_index[$i]."/sh/data/lsb_release.txt")))[6];
+		my $kernel = read_file($host_name_index[$i]."/sh/data/uname.txt");
+		my $arch = read_file($host_name_index[$i]."/sh/data/arch.txt");
+		my $cpu_count = read_file($host_name_index[$i]."/sh/data/cpu_count.txt");
+		my $memory;
+		if ( -e $host_name_index[$i]."/sh/data/mem.txt") {
+	 		$memory = (split ",", (read_file($host_name_index[$i]."/sh/data/mem.txt")))[1];
+		} else {
+	       		$memory= 1;
+		}
+		my $memory_used;
+		if ( -e $host_name_index[$i]."/sh/data/mem.txt") {
+		 	$memory_used = (split ",", (read_file($host_name_index[$i]."/sh/data/mem.txt")))[4];
+		} else {
+	       		$memory_used= 1;
+		}
+		my $uptime = read_file($host_name_index[$i]."/sh/data/uptime.txt");
+		$uptime =~ s/:/분 /;
+		my @daemon_list =  read_line_file($host_name_index[$i]."/sh/data/daemon_list.txt");
+		my @kdump = grep {/kdump/} @daemon_list;
+		if ( !grep {/kdump/} @daemon_list) {
+			$kdump[0] = "off";
+		} else {
+			$kdump[0] = (split "," , $kdump[0])[5];
+		}	
+		my $daemon_count = read_line_file($host_name_index[$i]."/sh/data/daemon_list.txt");
+		my $error_count;
+		if ( -e $host_name_index[$i]."/sh/data/error.txt") {
+			$error_count = read_line_file($host_name_index[$i]."/sh/data/error.txt");
+		} else {
+		       	$error_count = 0;
+		}
+		my $warn_count;
+		if ( -e $host_name_index[$i]."/sh/data/warn.txt") {
+			$warn_count = read_line_file($host_name_index[$i]."/sh/data/warn.txt");
+		} else {
+	       		$warn_count = 0;
+		}
+		my $fail_count;
+		if ( -e $host_name_index[$i]."/sh/data/fail.txt") {
+			$fail_count = read_line_file($host_name_index[$i]."/sh/data/fail.txt");
+		} else {
+	       		$fail_count = 0;
+		}
+		write_file($homepage_index."/sh/data/index.txt", join (":","<a href=./".(split "/", $host_name_index[$i])[4].">".$host_name."</a>","RHEL ".$os_ver,$kernel,$arch,$cpu_count,format_bytes($memory*1024*1024,precision=>0),format_bytes($memory_used*1024*1024,precision=>0),format_number($memory_used/$memory*100,2),$uptime, $kdump[0], $daemon_count, $warn_count, $fail_count ,$error_count."\n"));
 	}
 }
 
