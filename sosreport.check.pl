@@ -10,7 +10,7 @@ use File::Path;  		# 디렉토리 통째 삭제를 위한 모듈
 use File::stat;  		# 디렉토리 통째 삭제를 위한 모듈 
 use Encode;	 		# 한글 변환을 위한 모듈 
 use Encode::Locale;		# 한글 변환을 위한 모듈 
-use Encode::Guess qw/euc-kr utf8/;
+use Encode::Guess qw/euc-kr utf8 ascii cp949/;
 use utf8; 			# 한글 변환을 위한 모듈 
 use Time::Local; 		# 현재 시간을 구하기 위한 모듈 
 use POSIX;			# df 정보 foramtting을 위한 모듈 
@@ -519,6 +519,9 @@ sub read_line_file {
 	#open my $in , '<:encoding(console_in)', $filename or die "could not open '$filename' for reading $!";
 	if ( -e $filename ) {
 		open my $in , '<:encoding(guess)', $filename or  print "could not open '$filename' for reading $!\n";
+		if ( ref($in)) {
+			open $in, '<:encoding(ISO-8859-15)', $filename;
+		}
 		chomp ( @all = grep /\S/, readline($in));
 		close $in;
 	} else {
@@ -532,7 +535,10 @@ sub read_file{
 	my ($filename) = @_;
 	#open my $in , '<:encoding(console_in)', $filename or die "could not open '$filename' for reading $!";
 	if ( -e $filename ) {
-	open my $in , '<:encoding(console_in)', $filename or print "could not open '$filename' for reading $!\n";
+	open my $in , '<:encoding(guess)', $filename or print "could not open '$filename' for reading $!\n";
+	if ( ref($in)) {
+		open $in, '<:encoding(ISO-8859-15)', $filename;
+	}
 	local $/ = undef;
 	$all = <$in>;;
 	close $in;
@@ -552,7 +558,7 @@ sub array_print {
 sub write_file {
 	my ($filename, $content) = @_;
 	open my $out, '>>:encoding(console_out)', $filename or die "Could not open '$filename' for writing $!\n";
-	print $out $content;
+		print $out $content;
 	close $out;
 	return;
 }
