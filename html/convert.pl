@@ -7,9 +7,9 @@ use File::Basename qw(dirname);
 my $full_path = dirname(__FILE__);
 my $filename = ( split "/", $full_path)[4];
 
-system("/var/www/html/libpdf/bin/phantomjs /var/www/html/libpdf/examples/rasterize.js http://172.16.0.11/ /var/www/html/pdf/index.pdf A4");
+system("/var/www/html/libpdf/bin/phantomjs /var/www/html/libpdf/examples/rasterize.js http://sosreport.rp.kr/ /var/www/html/pdf/index.pdf A4");
 #print "Content-type: text/html\n\n";
 #print $full_path."\n";
 #print $filename."\n";
 
-print "Location:http://172.16.0.11/pdf/";
+print "Location:http://sosreport.rp.kr/pdf/";
